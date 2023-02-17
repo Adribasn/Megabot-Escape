@@ -6,6 +6,8 @@ screenWidth = 1280
 screenHeight = 720
 score = 0
 collisionTolerance = 10
+gameRunning = False
+gameHasRun = False
 
 groundRectHeight = 250
 
@@ -78,32 +80,45 @@ while True:
     
     screen.fill((0, 0, 0))
     pygame.draw.rect(screen, (0, 255, 0), (0, screenHeight - groundRectHeight, screenWidth, groundRectHeight))
-    
-    player.jump()
     player.draw()
 
-    enemyDistanceCounter += 1
+    if gameHasRun == False and gameRunning == False and keysPressed[pygame.K_SPACE]:
+        gameRunning = True
+    elif gameHasRun == True and gameRunning == False:
+        print('Press R to replay')
+        if keysPressed[pygame.K_r]:
+            gameRunning = True
 
-    if enemyDistanceCounter == enemyDistance:
-        enemyList.append(Enemy())
-        enemyDistanceCounter = 0
-        enemyDistance = random.randint(75, 225)
-    
-    playerRect = pygame.Rect(player.x, player.y, player.width, player.height)
-    for enemy in enemyList:
-        enemyRect = pygame.Rect(enemy.x, enemy.y, enemy.width, enemy.height)
-        if checkCollision(playerRect, enemyRect):
-            score = 0
-            enemyList = []
+    if gameRunning:
+        gameHasRun = True
 
-        if enemy.x > -enemyWidth:
-            enemy.draw()
-            enemy.x -= 3.5
-        else:
-            enemyList = enemyList[1:]
-    
-    score += 1
-    print(str(score))
+        player.jump()
+        player.draw()
+
+        enemyDistanceCounter += 1
+
+        if enemyDistanceCounter == enemyDistance:
+            enemyList.append(Enemy())
+            enemyDistanceCounter = 0
+            enemyDistance = random.randint(75, 225)
+        
+        playerRect = pygame.Rect(player.x, player.y, player.width, player.height)
+        for enemy in enemyList:
+            enemyRect = pygame.Rect(enemy.x, enemy.y, enemy.width, enemy.height)
+            if checkCollision(playerRect, enemyRect):
+                gameRunning = False
+                score = 0
+                enemyList = []
+
+            if enemy.x > -enemyWidth:
+                enemy.draw()
+                enemy.x -= 3.5
+            else:
+                enemyList = enemyList[1:]
+        
+        score += 1
+        print(str(score))
+
     pygame.display.update()
     clock.tick(144)
     
