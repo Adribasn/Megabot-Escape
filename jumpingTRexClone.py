@@ -48,8 +48,10 @@ class Player:
 
 class Enemy:
     def __init__(self):
-        self.width = enemyWidth
-        self.height = enemyHeight
+        self.dimensionList = [[42, 76], [24, 48], [64, 48]]
+        self.randomDimensions = random.randint(0, 2)
+        self.width = self.dimensionList[self.randomDimensions][0]
+        self.height = self.dimensionList[self.randomDimensions][1]
         self.x = screenWidth
         self.y = screenHeight - groundRectHeight - self.height
     
@@ -116,8 +118,8 @@ while True:
             else:
                 enemyList = enemyList[1:]
         
-        score += 1
-        print(str(score))
+        score += .1
+        print(str(int(score)))
 
     pygame.display.update()
     clock.tick(144)
