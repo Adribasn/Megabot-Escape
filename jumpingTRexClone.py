@@ -11,12 +11,10 @@ gameHasRun = False
 
 groundRectHeight = 250
 
-enemyVelocity = 5
-enemyWidth = 32
-enemyHeight = 64
+enemyVelocity = 7
 
 pygame.init()
-screen = pygame.display.set_mode((screenWidth, screenHeight))
+screen = pygame.display.set_mode((screenWidth, screenHeight), flags=pygame.SCALED, vsync=1)
 clock = pygame.time.Clock()
 
 class Player:
@@ -26,9 +24,9 @@ class Player:
         self.height = 64
         self.y = y - self.height
         self.jumping = False
-        self.originalYvelocity = 10
+        self.originalYvelocity = 18.75
         self.yVelocity = self.originalYvelocity 
-        self.gravity = .25
+        self.gravity = .75
     
     def draw(self):
         pygame.draw.rect(screen, (0, 0, 255), (self.x, self.y, self.width, self.height))
@@ -89,13 +87,15 @@ while True:
     elif gameHasRun == True and gameRunning == False:
         print('Press R to replay')
         if keysPressed[pygame.K_r]:
+            score = 0
+            enemyList = []
             gameRunning = True
 
     if gameRunning:
         gameHasRun = True
 
-        player.jump()
         player.draw()
+        player.jump()
 
         enemyDistanceCounter += 1
 
@@ -109,12 +109,10 @@ while True:
             enemyRect = pygame.Rect(enemy.x, enemy.y, enemy.width, enemy.height)
             if checkCollision(playerRect, enemyRect):
                 gameRunning = False
-                score = 0
-                enemyList = []
 
-            if enemy.x > -enemyWidth:
+            if enemy.x > -enemy.width:
                 enemy.draw()
-                enemy.x -= 3.5
+                enemy.x -= enemyVelocity
             else:
                 enemyList = enemyList[1:]
         
@@ -122,5 +120,5 @@ while True:
         print(str(int(score)))
 
     pygame.display.update()
-    clock.tick(144)
+    clock.tick(60)
     
