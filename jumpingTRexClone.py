@@ -5,7 +5,7 @@ import random
 screenWidth = 1280
 screenHeight = 720
 score = 0
-collisionTolerance = 10
+collisionTolerance = 15
 gameRunning = False
 gameHasRun = False
 
@@ -17,10 +17,24 @@ pygame.init()
 screen = pygame.display.set_mode((screenWidth, screenHeight), flags=pygame.SCALED, vsync=1)
 clock = pygame.time.Clock()
 
+playerIdle = pygame.image.load('assets\player\idle.png')
+playerIdle = pygame.transform.scale(playerIdle, (64, 64))
+
+playerRun1 = pygame.image.load('assets/player/run1.png')
+playerRun2 = pygame.image.load('assets/player/run2.png')
+playerRun3 = pygame.image.load('assets/player/run2.png')
+playerRun4 = pygame.image.load('assets/player/run2.png')
+
+playerRunFrames = [pygame.transform.scale(frame, (64, 64)) for frame in [playerRun1, playerRun2, playerRun3, playerRun4]]
+playerRunFrame = 0
+
+playerJump = pygame.image.load('assets\player\jump.png')
+playerJump = pygame.transform.scale(playerJump, (64, 64))
+
 class Player:
     def __init__(self, x, y):
         self.x = x
-        self.width = 32
+        self.width = 64
         self.height = 64
         self.y = y - self.height
         self.jumping = False
@@ -80,10 +94,12 @@ while True:
     
     screen.fill((0, 0, 0))
     pygame.draw.rect(screen, (0, 255, 0), (0, screenHeight - groundRectHeight, screenWidth, groundRectHeight))
-    player.draw()
 
-    if gameHasRun == False and gameRunning == False and keysPressed[pygame.K_SPACE]:
-        gameRunning = True
+    if gameHasRun == False and gameRunning == False:
+        screen.blit(playerIdle, (player.x, player.y))
+
+        if keysPressed[pygame.K_SPACE]:
+            gameRunning = True
     elif gameHasRun == True and gameRunning == False:
         print('Press R to replay')
         if keysPressed[pygame.K_r]:
@@ -94,7 +110,16 @@ while True:
     if gameRunning:
         gameHasRun = True
 
-        player.draw()
+        if player.jumping:
+            screen.blit(playerJump, (player.x, player.y))
+        else:
+            print(str(int(playerRunFrame)))
+            screen.blit(playerRunFrames[int(playerRunFrame)], (player.x, player.y))
+            playerRunFrame += .15
+
+            if int(playerRunFrame) == len(playerRunFrames):
+                playerRunFrame = 0
+        
         player.jump()
 
         enemyDistanceCounter += 1
@@ -117,7 +142,7 @@ while True:
                 enemyList = enemyList[1:]
         
         score += .1
-        print(str(int(score)))
+        #print(str(int(score)))
 
     pygame.display.update()
     clock.tick(60)
