@@ -1,5 +1,6 @@
 import pygame, sys
 import random
+import math
 
 #Global variables
 screenWidth = 1280
@@ -16,6 +17,11 @@ enemyVelocity = 7
 pygame.init()
 screen = pygame.display.set_mode((screenWidth, screenHeight), flags=pygame.SCALED, vsync=1)
 clock = pygame.time.Clock()
+
+background = pygame.image.load('assets/bg.png')
+background = pygame.transform.scale(background, (269, 470))
+backgroundMultiples = math.ceil(screenWidth / background.get_width()) 
+backgroundX = screenWidth
 
 playerIdle = pygame.image.load('assets\player\idle.png')
 playerIdle = pygame.transform.scale(playerIdle, (64, 64))
@@ -70,6 +76,11 @@ class Enemy:
     def draw(self):
         pygame.draw.rect(screen, (255, 255, 255), (self.x, self.y, self.width, self.height))
 
+class Tile:
+    def __init__(self, sprite, x, y):
+        self.sprite = sprite
+        self.x = x
+
 def checkCollision(rect1, rect2):
     if rect1.colliderect(rect2):
         if abs(rect1.right) - abs(rect2.left) < collisionTolerance:
@@ -83,6 +94,7 @@ enemyDistance = random.randint(75, 225)
 enemyDistanceCounter = 0
 
 enemyList = []
+backgroundList = [Tile(background, background.get_width() * i, 0) for i in range(backgroundMultiples)]
 
 while True:
     for event in pygame.event.get():
@@ -94,6 +106,8 @@ while True:
     
     screen.fill((0, 0, 0))
     pygame.draw.rect(screen, (0, 255, 0), (0, screenHeight - groundRectHeight, screenWidth, groundRectHeight))
+    for item in backgroundList:
+        screen.blit(item.sprite, (item.x, 0))
 
     if gameHasRun == False and gameRunning == False:
         screen.blit(playerIdle, (player.x, player.y))
@@ -110,10 +124,17 @@ while True:
     if gameRunning:
         gameHasRun = True
 
+        if backgroundList[0].x < -background.get_width():
+            backgroundList = backgroundList[1:]
+        elif backgroundList[-1].x < screenWidth - background.get_width():
+            backgroundList.append(Tile(background, backgroundList[-1].x + background.get_width(), 0))
+            
+        for item in backgroundList:
+            item.x -= 1
+        
         if player.jumping:
             screen.blit(playerJump, (player.x, player.y))
         else:
-            print(str(int(playerRunFrame)))
             screen.blit(playerRunFrames[int(playerRunFrame)], (player.x, player.y))
             playerRunFrame += .15
 
@@ -142,7 +163,7 @@ while True:
                 enemyList = enemyList[1:]
         
         score += .1
-        #print(str(int(score)))
+        print(str(int(score)))
 
     pygame.display.update()
     clock.tick(60)
