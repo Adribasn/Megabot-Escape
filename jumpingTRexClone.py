@@ -6,6 +6,7 @@ import math
 screenWidth = 1280
 screenHeight = 720
 score = 0
+highScore = 0
 collisionTolerance = 15
 gameRunning = False
 gameHasRun = False
@@ -15,7 +16,13 @@ groundRectHeight = 250
 gameVelocity = 7
 
 pygame.init()
+pygame.display.set_caption('Megabot Escape')
+scoreFont = pygame.font.Font('assets/alagard.ttf', 32)
+gameOverFont = pygame.font.Font('assets/alagard.ttf', 128)
 screen = pygame.display.set_mode((screenWidth, screenHeight), flags=pygame.SCALED, vsync=1)
+gameOverScreen = pygame.Surface((screenWidth, screenHeight))
+gameOverScreen.set_alpha(100)
+gameOverScreen.fill((0, 0, 0))
 clock = pygame.time.Clock()
 
 background = pygame.image.load('assets/bg.png')
@@ -68,11 +75,11 @@ enemyIdle = pygame.transform.scale(enemyIdle, (64, 64))
 
 
 class Player:
-    def __init__(self, x, y):
+    def __init__(self, x):
         self.x = x
         self.width = 64
         self.height = 64
-        self.y = y - self.height
+        self.y = screenHeight - groundRectHeight - self.height
         self.jumping = False
         self.originalYvelocity = 18.75
         self.yVelocity = self.originalYvelocity 
@@ -80,6 +87,11 @@ class Player:
     
     def draw(self):
         pygame.draw.rect(screen, (0, 0, 255), (self.x, self.y, self.width, self.height))
+
+    def reset(self):
+        self.jumping = False
+        self.y = screenHeight - groundRectHeight - self.height
+        self.yVelocity = self.originalYvelocity
     
     def jump(self):
         if keysPressed[pygame.K_SPACE]:
@@ -127,7 +139,7 @@ def checkCollision(rect1, rect2):
         if abs(rect1.bottom) - abs(rect2.top) < collisionTolerance:
             return True
     
-player = Player(100, screenHeight - groundRectHeight)
+player = Player(100)
 
 enemyDistance = random.randint(75, 225)
 enemyDistanceCounter = 0
@@ -169,13 +181,22 @@ while True:
         if keysPressed[pygame.K_SPACE]:
             gameRunning = True
     elif gameHasRun == True and gameRunning == False:
+        if score > highScore:
+            highScore = score
+
         screen.blit(playerRunFrames[int(playerRunFrame)], (player.x, player.y))
         for enemy in enemyList:
             enemy.draw()
-            
-        print('Press R to replay')
+
+        screen.blit(gameOverScreen, (0, 0))
+        gameOverText = gameOverFont.render('Press R to retry', False, (255, 255, 255)) 
+        gameOverTextX = (screenWidth / 2) - (gameOverText.get_width() / 2)
+        gameOverTextY = (screenHeight / 2) - (gameOverText.get_height() / 2)
+        screen.blit(gameOverText, (gameOverTextX, gameOverTextY))
+        
         if keysPressed[pygame.K_r]:
             score = 0
+            player.reset()
             enemyList = []
             gameRunning = True
 
@@ -231,6 +252,13 @@ while True:
                 enemyList = enemyList[1:]
         
         score += .1
+
+    displayHighScore = scoreFont.render('HI   ' + str(int(highScore)), False, (255, 255, 255))
+    displayHighScore.set_alpha(200)
+    displayScore = scoreFont.render(str(int(score)), False, (255, 255, 255))
+    
+    screen.blit(displayHighScore, (1000, 100))
+    screen.blit(displayScore, (1150, 100))
 
     pygame.display.update()
     clock.tick(60)
