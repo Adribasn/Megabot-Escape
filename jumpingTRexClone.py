@@ -39,6 +39,7 @@ foreground10 = pygame.transform.scale(foreground10, (64, 64))
 foreground11 = pygame.image.load('assets/tilemap/tile010.png')
 foreground12 = pygame.image.load('assets/tilemap/tile036.png')
 foreground13 = pygame.image.load('assets/tilemap/tile037.png')
+foreground13 = pygame.transform.scale(foreground13, (64, 64))
 foreground14 = pygame.image.load('assets/tilemap/tile039.png')
 foreground15 = pygame.image.load('assets/tilemap/tile040.png')
 foreground16 = pygame.image.load('assets/tilemap/tile041.png')
@@ -61,6 +62,10 @@ playerRunFrame = 0
 
 playerJump = pygame.image.load('assets\player\jump.png')
 playerJump = pygame.transform.scale(playerJump, (64, 64))
+
+enemyIdle = pygame.image.load('assets\enemy\enemy1.png')
+enemyIdle = pygame.transform.scale(enemyIdle, (64, 64))
+
 
 class Player:
     def __init__(self, x, y):
@@ -91,7 +96,7 @@ class Player:
 
 class Enemy:
     def __init__(self):
-        self.dimensionList = [[42, 76], [24, 48], [64, 48]]
+        self.dimensionList = [[64, 64], [128, 64], [64, 128]]
         self.randomDimensions = random.randint(0, 2)
         self.width = self.dimensionList[self.randomDimensions][0]
         self.height = self.dimensionList[self.randomDimensions][1]
@@ -99,7 +104,15 @@ class Enemy:
         self.y = screenHeight - groundRectHeight - self.height
     
     def draw(self):
-        pygame.draw.rect(screen, (255, 255, 255), (self.x, self.y, self.width, self.height))
+        #pygame.draw.rect(screen, (255, 255, 255), (self.x, self.y, self.width, self.height))
+        if self.randomDimensions == 0:
+            screen.blit(enemyIdle, (self.x, self.y))
+        elif self.randomDimensions == 1:
+            screen.blit(enemyIdle, (self.x, self.y))
+            screen.blit(enemyIdle, (self.x + enemyIdle.get_width(), self.y))
+        elif self.randomDimensions == 2:
+            screen.blit(enemyIdle, (self.x, self.y))
+            screen.blit(foreground13, (self.x, self.y + enemyIdle.get_height()))
 
 class Tile:
     def __init__(self, sprite, x, y):
@@ -120,6 +133,7 @@ enemyDistance = random.randint(75, 225)
 enemyDistanceCounter = 0
 
 enemyList = []
+
 backgroundList = [Tile(background, background.get_width() * i, 0) for i in range(backgroundMultiples)]
 
 foregroundList = []
@@ -155,6 +169,10 @@ while True:
         if keysPressed[pygame.K_SPACE]:
             gameRunning = True
     elif gameHasRun == True and gameRunning == False:
+        screen.blit(playerRunFrames[int(playerRunFrame)], (player.x, player.y))
+        for enemy in enemyList:
+            enemy.draw()
+            
         print('Press R to replay')
         if keysPressed[pygame.K_r]:
             score = 0
@@ -200,6 +218,7 @@ while True:
             enemyDistance = random.randint(75, 225)
         
         playerRect = pygame.Rect(player.x, player.y, player.width, player.height)
+
         for enemy in enemyList:
             enemyRect = pygame.Rect(enemy.x, enemy.y, enemy.width, enemy.height)
             if checkCollision(playerRect, enemyRect):
@@ -212,7 +231,6 @@ while True:
                 enemyList = enemyList[1:]
         
         score += .1
-        #print(str(int(score)))
 
     pygame.display.update()
     clock.tick(60)
