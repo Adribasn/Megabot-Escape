@@ -23,6 +23,14 @@ screen = pygame.display.set_mode((screenWidth, screenHeight), flags=pygame.SCALE
 gameOverScreen = pygame.Surface((screenWidth, screenHeight))
 gameOverScreen.set_alpha(100)
 gameOverScreen.fill((0, 0, 0))
+jumpSound = pygame.mixer.Sound('assets\sfx\jump.wav')
+hitSound = pygame.mixer.Sound('assets\sfx\hit.wav')
+restartSound = pygame.mixer.Sound('assets/sfx/restart.wav')
+succesSound = pygame.mixer.Sound('assets\sfx\succes.wav')
+jumpSound.set_volume(.25)
+hitSound.set_volume(.25)
+restartSound.set_volume(.25)
+succesSound.set_volume(.25)
 clock = pygame.time.Clock()
 
 background = pygame.image.load('assets/bg.png')
@@ -149,6 +157,9 @@ enemyList = []
 backgroundList = [Tile(background, background.get_width() * i, 0) for i in range(backgroundMultiples)]
 
 foregroundList = []
+
+flickerScoreCount = 0
+scoreAlpha = 255
 for j in range(len(foregroundTilemap)):
     tileList = []
     for i in range(len(foregroundTilemap[j])):
@@ -166,7 +177,9 @@ while True:
             sys.exit()
     
     keysPressed = pygame.key.get_pressed()
-    
+    if keysPressed[pygame.K_SPACE] and pygame.mixer.Channel(0).get_busy() == False:
+        jumpSound.play(0)
+
     screen.fill((0, 0, 0))
     for item in backgroundList:
         screen.blit(item.sprite, (item.x, item.y))
@@ -193,12 +206,14 @@ while True:
         gameOverTextX = (screenWidth / 2) - (gameOverText.get_width() / 2)
         gameOverTextY = (screenHeight / 2) - (gameOverText.get_height() / 2)
         screen.blit(gameOverText, (gameOverTextX, gameOverTextY))
-        
+
         if keysPressed[pygame.K_r]:
             score = 0
             player.reset()
             enemyList = []
             gameRunning = True
+            if pygame.mixer.Channel(0).get_busy() == False:
+                restartSound.play(0)
 
     if gameRunning:
         gameHasRun = True
@@ -244,6 +259,8 @@ while True:
             enemyRect = pygame.Rect(enemy.x, enemy.y, enemy.width, enemy.height)
             if checkCollision(playerRect, enemyRect):
                 gameRunning = False
+                if pygame.mixer.Channel(0).get_busy() == False:
+                    hitSound.play(0)
 
             if enemy.x > -enemy.width:
                 enemy.draw()
@@ -252,10 +269,19 @@ while True:
                 enemyList = enemyList[1:]
         
         score += .1
+    
+        if int(score) % 100 == 0:
+            if pygame.mixer.Channel(0).get_busy() == False:
+                jumpSound.stop()
+                pygame.mixer.Channel(0).play(succesSound)
+                scoreAlpha = 0
+            else:
+                scoreAlpha = 255
 
     displayHighScore = scoreFont.render('HI   ' + str(int(highScore)), False, (255, 255, 255))
     displayHighScore.set_alpha(200)
     displayScore = scoreFont.render(str(int(score)), False, (255, 255, 255))
+    displayScore.set_alpha(scoreAlpha)
     
     screen.blit(displayHighScore, (1000, 100))
     screen.blit(displayScore, (1150, 100))
