@@ -1,5 +1,5 @@
 # Megabot-Escape
-Megabot Escape is a NES-era style clone of the Chrome jumping dinosaur game, made in Python using Pygame.
+Megabot Escape is a SNES-era style clone of the Chrome jumping dinosaur game, made in Python using Pygame.
 
 ![screemshot1](https://user-images.githubusercontent.com/68373594/220573591-aa3808d3-b864-4446-98f5-f6fcfb551a0f.png)
 
