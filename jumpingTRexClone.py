@@ -2,7 +2,6 @@ import pygame, sys
 import random
 import math
 
-#Global variables
 screenWidth = 1280
 screenHeight = 720
 score = 0
@@ -124,7 +123,6 @@ class Enemy:
         self.y = screenHeight - groundRectHeight - self.height
     
     def draw(self):
-        #pygame.draw.rect(screen, (255, 255, 255), (self.x, self.y, self.width, self.height))
         if self.randomDimensions == 0:
             screen.blit(enemyIdle, (self.x, self.y))
         elif self.randomDimensions == 1:
@@ -158,7 +156,6 @@ backgroundList = [Tile(background, background.get_width() * i, 0) for i in range
 
 foregroundList = []
 
-flickerScoreCount = 0
 scoreAlpha = 255
 for j in range(len(foregroundTilemap)):
     tileList = []
@@ -259,8 +256,7 @@ while True:
             enemyRect = pygame.Rect(enemy.x, enemy.y, enemy.width, enemy.height)
             if checkCollision(playerRect, enemyRect):
                 gameRunning = False
-                if pygame.mixer.Channel(0).get_busy() == False:
-                    hitSound.play(0)
+                hitSound.play(0)
 
             if enemy.x > -enemy.width:
                 enemy.draw()
@@ -270,10 +266,9 @@ while True:
         
         score += .1
     
-        if int(score) % 100 == 0:
-            if pygame.mixer.Channel(0).get_busy() == False:
-                jumpSound.stop()
-                pygame.mixer.Channel(0).play(succesSound)
+        if int(score) % 100 == 0 and int(score) > 0:
+            if pygame.mixer.Channel(1).get_busy() == False:
+                pygame.mixer.Channel(1).play(succesSound)
                 scoreAlpha = 0
             else:
                 scoreAlpha = 255
